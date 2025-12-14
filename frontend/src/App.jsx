@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { exportPDF } from "./utils/api"; // adjust path if needed
 import { Square, Circle, Type, Image as ImageIcon, Download, MousePointer2, Triangle, Hexagon, Palette, Undo, Redo, ChevronUp, ChevronDown, ChevronsUp, ChevronsDown, Save, FolderOpen, Grid, PenTool, RotateCw, Clipboard, CheckCircle, XCircle, Ungroup, Group } from 'lucide-react'; 
 
 // --- Constants ---
@@ -1385,32 +1386,31 @@ function App() {
     };
 
     const handleExport = async () => {
-        try {
-            const elementsToSend = elements.map(({ img, ...rest }) => rest);
+  try {
+    const elementsToSend = elements.map(({ img, ...rest }) => rest);
 
-            const response = await axios.post('http://localhost:3000/api/canvas/export', {
-                width: canvasSize.width,
-                height: canvasSize.height,
-                elements: JSON.stringify(elementsToSend),
-                settings: exportSettings
-            }, {
-                responseType: 'blob'
-            });
+    // Call Render backend via helper
+    const pdfBlob = await exportPDF({
+      width: canvasSize.width,
+      height: canvasSize.height,
+      elements: JSON.stringify(elementsToSend),
+      settings: exportSettings
+    });
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'canvas-export.pdf');
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            
-            setToast({ message: 'PDF export successful!', type: 'success' });
-        } catch (error) {
-            console.error("Export failed:", error);
-            setToast({ message: 'Failed to export PDF.', type: 'error' });
-        }
-    };
+    const url = window.URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'canvas-export.pdf');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setToast({ message: 'PDF export successful!', type: 'success' });
+  } catch (error) {
+    console.error("Export failed:", error);
+    setToast({ message: 'Failed to export PDF.', type: 'error' });
+  }
+};
     
     // --- COMPLETE KEYBOARD SHORTCUTS ---
     useEffect(() => {
