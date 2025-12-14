@@ -1,0 +1,16 @@
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+
+# Vite
+.vite/
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
